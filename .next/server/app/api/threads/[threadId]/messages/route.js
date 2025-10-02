@@ -1,0 +1,11 @@
+var R=require("../../../../../chunks/[turbopack]_runtime.js")("server/app/api/threads/[threadId]/messages/route.js")
+R.c("server/chunks/node_modules_next_c93f9e2b._.js")
+R.c("server/chunks/node_modules_@auth_core_889cc73b._.js")
+R.c("server/chunks/node_modules_jose_dist_webapi_911f8e7d._.js")
+R.c("server/chunks/node_modules_drizzle-orm_345e7349._.js")
+R.c("server/chunks/node_modules_@neondatabase_serverless_index_mjs_2c73916b._.js")
+R.c("server/chunks/node_modules_8e2ea347._.js")
+R.c("server/chunks/[root-of-the-server]__c706c4a7._.js")
+R.m("[project]/.next-internal/server/app/api/threads/[threadId]/messages/route/actions.js [app-rsc] (server actions loader, ecmascript)")
+R.m("[project]/node_modules/next/dist/esm/build/templates/app-route.js { INNER_APP_ROUTE => \"[project]/app/api/threads/[threadId]/messages/route.ts [app-route] (ecmascript)\" } [app-route] (ecmascript)")
+module.exports=R.m("[project]/node_modules/next/dist/esm/build/templates/app-route.js { INNER_APP_ROUTE => \"[project]/app/api/threads/[threadId]/messages/route.ts [app-route] (ecmascript)\" } [app-route] (ecmascript)").exports

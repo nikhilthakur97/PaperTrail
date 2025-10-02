@@ -1,0 +1,3 @@
+{
+  "/api/threads/[threadId]/messages/route": "app/api/threads/[threadId]/messages/route.js"
+}
