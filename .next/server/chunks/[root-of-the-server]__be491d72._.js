@@ -481,6 +481,7 @@ const { handlers, signIn, signOut, auth } = (0, __TURBOPACK__imported__module__$
         sessionsTable: __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$database$2f$schema$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["sessions"],
         verificationTokensTable: __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$database$2f$schema$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["verificationTokens"]
     }),
+    trustHost: true,
     session: {
         strategy: "jwt"
     },
@@ -601,6 +602,7 @@ const openai = new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$
 async function extractTextFromPDF(buffer) {
     try {
         // Use pdf-parse-fork which is a working maintained fork
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const pdfParse = (await __turbopack_context__.A("[project]/node_modules/pdf-parse-fork/index.js [app-route] (ecmascript, async loader)")).default;
         const data = await pdfParse(buffer);
         return data.text;
@@ -646,7 +648,7 @@ async function generateEmbedding(text) {
             });
             console.log('✓ Generated Azure OpenAI embedding');
             return response.data[0].embedding;
-        } catch (azureError) {
+        } catch  {
             // Fallback to simple hash-based embedding for demo purposes
             console.log('→ Azure embeddings not available, using fallback hash-based embeddings');
             return createSimpleEmbedding(text);
@@ -933,9 +935,9 @@ Provide accurate, well-formatted responses to research questions.`;
                     console.error('Streaming error:', error);
                     // Handle rate limit errors specifically
                     let errorMessage = 'Failed to generate response';
-                    if (error?.status === 429) {
+                    if (error && typeof error === 'object' && 'status' in error && error.status === 429) {
                         errorMessage = 'Rate limit exceeded. Please wait 60 seconds and try again. Your Azure OpenAI tier has limited tokens/requests per minute.';
-                    } else if (error?.message) {
+                    } else if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
                         errorMessage = error.message;
                     }
                     const errorData = JSON.stringify({

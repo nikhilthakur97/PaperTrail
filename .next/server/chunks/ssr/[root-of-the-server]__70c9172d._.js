@@ -441,6 +441,7 @@ const { handlers, signIn, signOut, auth } = (0, __TURBOPACK__imported__module__$
         sessionsTable: __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$database$2f$schema$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["sessions"],
         verificationTokensTable: __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$database$2f$schema$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["verificationTokens"]
     }),
+    trustHost: true,
     session: {
         strategy: "jwt"
     },

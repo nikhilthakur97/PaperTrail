@@ -72,6 +72,7 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isStreamingNewThread, setIsStreamingNewThread] = useState(false);
   interface SearchResult {
     id: string;
     title: string;
@@ -99,12 +100,12 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
     fetchThreads();
   }, []);
 
-  // Load messages when thread changes
+  // Load messages when thread changes (but not when streaming a new thread)
   useEffect(() => {
-    if (currentThreadId) {
+    if (currentThreadId && !isStreamingNewThread) {
       loadThreadMessages(currentThreadId);
     }
-  }, [currentThreadId]);
+  }, [currentThreadId, isStreamingNewThread]);
 
   const fetchDocuments = async () => {
     try {
@@ -140,6 +141,32 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
       }
     } catch (error) {
       console.error('Failed to fetch threads:', error);
+    }
+  };
+
+  const handleDeleteThread = async (threadId: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent thread selection when clicking delete
+
+    if (!confirm('Are you sure you want to delete this conversation?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/threads?id=${threadId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        // Remove from threads list
+        setThreads((prev) => prev.filter((thread) => thread.id !== threadId));
+
+        // If the deleted thread was active, clear the chat
+        if (currentThreadId === threadId) {
+          handleNewChat();
+        }
+      }
+    } catch (error) {
+      console.error('Failed to delete thread:', error);
     }
   };
 
@@ -236,6 +263,12 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
     setInput("");
     setIsLoading(true);
 
+    // Flag that we're streaming a new thread if no threadId exists
+    const isNewThread = !currentThreadId;
+    if (isNewThread) {
+      setIsStreamingNewThread(true);
+    }
+
     try {
       // Call the chat API with SSE streaming
       const response = await fetch("/api/chat", {
@@ -272,6 +305,8 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
       }
 
       let done = false;
+      let firstChunkReceived = false;
+
       while (!done) {
         const { value, done: streamDone } = await reader.read();
         done = streamDone;
@@ -293,6 +328,12 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
               }
 
               if (data.content) {
+                // Stop loading indicator once we receive first content
+                if (!firstChunkReceived) {
+                  setIsLoading(false);
+                  firstChunkReceived = true;
+                }
+
                 // Update the assistant message with streamed content
                 setMessages((prev) =>
                   prev.map((msg) =>
@@ -305,6 +346,10 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
 
               if (data.done) {
                 done = true;
+                // Clear the streaming flag when done
+                if (isNewThread) {
+                  setIsStreamingNewThread(false);
+                }
                 break;
               }
             }
@@ -313,6 +358,10 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
       }
     } catch (error) {
       console.error("Error sending message:", error);
+      // Clear streaming flag on error
+      if (isNewThread) {
+        setIsStreamingNewThread(false);
+      }
       // Add error message
       const errorMessage: Message = {
         id: (Date.now() + 2).toString(),
@@ -337,6 +386,7 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
     setMessages([]);
     setCurrentThreadId(null);
     setSelectedFiles([]);
+    setIsStreamingNewThread(false);
   };
 
   const exportConversation = (format: 'markdown' | 'text' | 'pdf') => {
@@ -443,8 +493,14 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
   };
 
   const insertPaperReference = (paper: SearchResult) => {
-    const reference = `\n\nReference: ${paper.title} (${paper.id})\nAuthors: ${paper.authors}\nYear: ${paper.year}\nURL: ${paper.url}\n`;
-    setInput((prev) => prev + reference);
+    const reference = `Reference: ${paper.title} (${paper.id})\nAuthors: ${paper.authors}\nYear: ${paper.year}\nURL: ${paper.url}`;
+    setInput((prev) => {
+      // Add proper spacing: no space if empty, otherwise add newlines before
+      if (prev.trim() === '') {
+        return reference;
+      }
+      return prev + '\n\n' + reference;
+    });
     setShowSearchModal(false);
   };
 
@@ -541,13 +597,35 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
                     </div>
                   ) : (
                     threads.map((thread) => (
-                      <SidebarMenuItem key={thread.id}>
-                        <SidebarMenuButton
-                          onClick={() => setCurrentThreadId(thread.id)}
-                          isActive={currentThreadId === thread.id}
-                        >
-                          <span className="truncate">{thread.title}</span>
-                        </SidebarMenuButton>
+                      <SidebarMenuItem key={thread.id} className="group">
+                        <div className="relative flex items-center w-full">
+                          <SidebarMenuButton
+                            onClick={() => setCurrentThreadId(thread.id)}
+                            isActive={currentThreadId === thread.id}
+                            className="flex-1 pr-9"
+                          >
+                            <span className="truncate">{thread.title}</span>
+                          </SidebarMenuButton>
+                          <button
+                            onClick={(e) => handleDeleteThread(thread.id, e)}
+                            className="absolute right-1 p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-destructive/20 text-muted-foreground hover:text-destructive transition-opacity"
+                            title="Delete conversation"
+                          >
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                              />
+                            </svg>
+                          </button>
+                        </div>
                       </SidebarMenuItem>
                     ))
                   )}

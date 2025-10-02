@@ -481,6 +481,7 @@ const { handlers, signIn, signOut, auth } = (0, __TURBOPACK__imported__module__$
         sessionsTable: __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$database$2f$schema$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["sessions"],
         verificationTokensTable: __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$database$2f$schema$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["verificationTokens"]
     }),
+    trustHost: true,
     session: {
         strategy: "jwt"
     },
@@ -579,7 +580,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$drizzle$2d$o
 ;
 const runtime = 'nodejs';
 const dynamic = 'force-dynamic';
-async function GET(req) {
+async function GET() {
     try {
         // Verify authentication
         const session = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$lib$2f$auth$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["auth"])();
@@ -603,7 +604,7 @@ async function GET(req) {
         const fullDocs = await __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$database$2f$db$2d$server$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__$3c$locals$3e$__["db"].select().from(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$database$2f$schema$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["documents"]).where((0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$drizzle$2d$orm$2f$sql$2f$expressions$2f$conditions$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["eq"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$database$2f$schema$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["documents"].uploadedByUserId, session.user.id));
         const docsWithChunkCount = userDocuments.map((doc)=>{
             const fullDoc = fullDocs.find((d)=>d.id === doc.id);
-            const chunkCount = fullDoc?.metadata && typeof fullDoc.metadata === 'object' && 'chunkCount' in fullDoc.metadata ? fullDoc.metadata.chunkCount : 0;
+            const chunkCount = fullDoc?.metadata && typeof fullDoc.metadata === 'object' && 'chunkCount' in fullDoc.metadata ? fullDoc.metadata.chunkCount ?? 0 : 0;
             return {
                 ...doc,
                 chunkCount

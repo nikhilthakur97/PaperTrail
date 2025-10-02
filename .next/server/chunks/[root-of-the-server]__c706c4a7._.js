@@ -481,6 +481,7 @@ const { handlers, signIn, signOut, auth } = (0, __TURBOPACK__imported__module__$
         sessionsTable: __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$database$2f$schema$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["sessions"],
         verificationTokensTable: __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$database$2f$schema$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["verificationTokens"]
     }),
+    trustHost: true,
     session: {
         strategy: "jwt"
     },
@@ -589,7 +590,7 @@ async function GET(req, { params }) {
                 status: 401
             });
         }
-        const threadId = params.threadId;
+        const { threadId } = await params;
         // Verify thread belongs to user
         const [thread] = await __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$database$2f$db$2d$server$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__$3c$locals$3e$__["db"].select().from(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$database$2f$schema$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["threads"]).where((0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$drizzle$2d$orm$2f$sql$2f$expressions$2f$conditions$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["eq"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$database$2f$schema$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["threads"].id, threadId)).limit(1);
         if (!thread || thread.userId !== session.user.id) {

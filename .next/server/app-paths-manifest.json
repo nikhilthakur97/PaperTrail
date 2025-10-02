@@ -1,3 +1,12 @@
 {
-  "/chat/page": "app/chat/page.js"
+  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
+  "/api/auth/check-email/route": "app/api/auth/check-email/route.js",
+  "/api/chat/route": "app/api/chat/route.js",
+  "/api/documents/route": "app/api/documents/route.js",
+  "/api/search/route": "app/api/search/route.js",
+  "/api/threads/[threadId]/messages/route": "app/api/threads/[threadId]/messages/route.js",
+  "/api/threads/route": "app/api/threads/route.js",
+  "/chat/page": "app/chat/page.js",
+  "/login/page": "app/login/page.js",
+  "/page": "app/page.js"
 }
