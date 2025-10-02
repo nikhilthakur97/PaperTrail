@@ -11,7 +11,8 @@
       "Bash(psql:*)",
       "Read(//var/folders/kl/bsk1vb193ts6br3n1kmljv600000gn/T/TemporaryItems/NSIRD_screencaptureui_xBJNhy/**)",
       "Bash(docker-compose up:*)",
-      "Read(//Users/nikhil/Desktop/**)"
+      "Read(//Users/nikhil/Desktop/**)",
+      "Read(//Users/nikhil/Downloads/PaperTrail /**)"
     ],
     "deny": [],
     "ask": []
