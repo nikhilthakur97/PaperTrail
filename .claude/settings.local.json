@@ -14,7 +14,9 @@
       "Read(//Users/nikhil/Desktop/**)",
       "Read(//Users/nikhil/Downloads/PaperTrail /**)",
       "Read(//Users/nikhil/Downloads/PaperTrail /app/components/chat/**)",
-      "Read(//Users/nikhil/Downloads/PaperTrail /app/api/threads/**)"
+      "Read(//Users/nikhil/Downloads/PaperTrail /app/api/threads/**)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)"
     ],
     "deny": [],
     "ask": []
