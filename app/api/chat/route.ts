@@ -4,7 +4,7 @@ import { db } from '@/app/database/db-server';
 import { threads, messages, documents } from '@/app/database/schema';
 import { eq } from 'drizzle-orm';
 import { model } from '@/app/lib/gemini';
-import { findRelevantChunks, type Chunk } from '@/app/lib/pdf-processor';
+import { findRelevantMultimodalChunks, type MultimodalChunk } from '@/app/lib/pdf-multimodal-processor';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -70,27 +70,34 @@ export async function POST(req: NextRequest) {
       .from(documents)
       .where(eq(documents.uploadedByUserId, session.user.id));
 
-    // Retrieve relevant context from uploaded documents
+    // Retrieve relevant context from uploaded documents (multimodal)
     let contextFromDocuments = '';
+    let hasImageContext = false;
     if (uploadedDocs.length > 0) {
       // Collect all chunks from all documents
-      const allChunks: Chunk[] = [];
+      const allChunks: MultimodalChunk[] = [];
       uploadedDocs.forEach((doc) => {
         if (doc.metadata && typeof doc.metadata === 'object' && 'chunks' in doc.metadata) {
-          const docChunks = (doc.metadata as { chunks?: Chunk[] }).chunks || [];
+          const docChunks = (doc.metadata as { chunks?: MultimodalChunk[] }).chunks || [];
           allChunks.push(...docChunks);
         }
       });
 
       if (allChunks.length > 0) {
-        // Find relevant chunks for the current user message
-        const relevantChunks = await findRelevantChunks(message, allChunks, 3);
+        // Find relevant chunks (text and images) for the current user message
+        const relevantChunks = await findRelevantMultimodalChunks(message, allChunks, 5);
 
         if (relevantChunks.length > 0) {
-          contextFromDocuments = '\n\nRelevant excerpts from uploaded documents:\n\n' +
-            relevantChunks.map((chunk, idx) =>
-              `[Excerpt ${idx + 1}]:\n${chunk.text}\n`
-            ).join('\n');
+          contextFromDocuments = '\n\nRelevant excerpts from uploaded documents:\n\n';
+
+          relevantChunks.forEach((chunk, idx) => {
+            if (chunk.type === 'text') {
+              contextFromDocuments += `[Text Excerpt ${idx + 1}]:\n${chunk.text}\n\n`;
+            } else if (chunk.type === 'image') {
+              hasImageContext = true;
+              contextFromDocuments += `[Visual Content ${idx + 1} - Page ${chunk.pageNumber}]:\n${chunk.description}\n\n`;
+            }
+          });
         }
       }
     }
@@ -112,9 +119,35 @@ export async function POST(req: NextRequest) {
    - Use > for important quotes or findings
    - Use numbered lists (1., 2., 3.) for sequential information
 
-4. CITATIONS: When referencing information, mention which excerpt it comes from (e.g., "According to Excerpt 1...")
+4. TABLES AND VISUAL CONTENT:
+   ${hasImageContext ? '- Visual Content excerpts include tables, charts, and diagrams that have been pre-analyzed\n   - When referencing tables, maintain the Markdown table format provided\n   - When referencing charts/graphs, cite the specific data points mentioned\n   - Always cite which Visual Content number you are referencing' : ''}
 
-5. FORMATTING EXAMPLE:
+5. CHART GENERATION:
+   - When presenting tabular data or statistics, you can ALSO create visual charts
+   - Use this special format for charts:
+   \`\`\`chart:TYPE
+   {
+     "title": "Chart Title",
+     "labels": ["Label1", "Label2", "Label3"],
+     "datasets": [{"label": "Data Series", "data": [value1, value2, value3]}]
+   }
+   \`\`\`
+   - Available chart types: pie, bar, line
+   - For pie charts: Use when showing proportions or percentages (e.g., distribution, composition)
+   - For bar charts: Use when comparing categories or groups
+   - For line charts: Use when showing trends over time or continuous data
+   - Example pie chart:
+   \`\`\`chart:pie
+   {
+     "title": "Treatment Response Distribution",
+     "labels": ["Positive Response", "Partial Response", "No Response"],
+     "datasets": [{"label": "Response Rate", "data": [67, 23, 10]}]
+   }
+   \`\`\`
+
+6. CITATIONS: When referencing information, mention which excerpt it comes from (e.g., "According to Text Excerpt 1..." or "As shown in Visual Content 2...")
+
+7. FORMATTING EXAMPLE:
 ## Main Topic
 
 Brief introduction.
@@ -125,7 +158,25 @@ Brief introduction.
 - Second item
 - Third item
 
-## Next Section
+${hasImageContext ? `## Data from Visual Content
+
+According to Visual Content 1:
+
+| Column 1 | Column 2 |
+|----------|----------|
+| Data     | Data     |
+
+### Visual Representation
+
+\`\`\`chart:pie
+{
+  "title": "Data Distribution",
+  "labels": ["Category A", "Category B"],
+  "datasets": [{"label": "Values", "data": [60, 40]}]
+}
+\`\`\`
+
+` : ''}## Next Section
 
 More information here.
 

@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/nikhil/Desktop/github/PaperTrail /**)",
+      "Read(//Users/nikhil/Desktop/github/PaperTrail /app/database/**)",
+      "Read(//Users/nikhil/Desktop/github/PaperTrail /app/lib/**)",
+      "Read(//Users/nikhil/Desktop/github/PaperTrail /app/api/chat/**)",
+      "Read(//Users/nikhil/Desktop/github/PaperTrail /app/components/chat/**)",
+      "Read(//Users/nikhil/Desktop/github/PaperTrail /app/api/upload/**)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

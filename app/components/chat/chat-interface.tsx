@@ -3,10 +3,8 @@
 import { useState, useRef, useEffect } from "react";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeHighlight from "rehype-highlight";
 import { jsPDF } from "jspdf";
+import { MarkdownWithCharts } from "./markdown-with-charts";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import { Textarea } from "@/app/components/ui/textarea";
@@ -861,28 +859,7 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
                           {message.content}
                         </p>
                       ) : (
-                        <div className="prose prose-sm dark:prose-invert max-w-none">
-                          <ReactMarkdown
-                            remarkPlugins={[remarkGfm]}
-                            rehypePlugins={[rehypeHighlight]}
-                            components={{
-                              code: ({ className, children, ...props }) => {
-                                const isInline = !className;
-                                return isInline ? (
-                                  <code className="bg-background/50 px-1 py-0.5 rounded text-xs" {...props}>
-                                    {children}
-                                  </code>
-                                ) : (
-                                  <code className={className} {...props}>
-                                    {children}
-                                  </code>
-                                );
-                              },
-                            }}
-                          >
-                            {message.content}
-                          </ReactMarkdown>
-                        </div>
+                        <MarkdownWithCharts content={message.content} />
                       )}
 
                       {/* Action buttons for assistant messages */}

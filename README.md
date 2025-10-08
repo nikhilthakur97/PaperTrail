@@ -20,6 +20,8 @@ PaperTrail is a Retrieval‑Augmented Generation (RAG) conversational app that a
 
 * **Unified RAG**: PubMed + arXiv + user uploads with citations
 * **PDF Upload & Processing**: Drop PDFs to add them to your knowledge base
+* **Multimodal Analysis**: Automatically extracts and analyzes tables, charts, and diagrams from PDFs using Gemini Vision
+* **Interactive Charts**: AI generates pie, bar, and line charts from table data with Chart.js
 * **Citation Tracking**: Every answer includes references to source materials
 * **Cloud‑Agnostic**: Fully containerized and portable to any cloud provider
 
@@ -102,7 +104,9 @@ PaperTrail runs **entirely inside one Next.js application**. There is **no separ
 ### Additional Technologies
 
 * **Email**: Nodemailer/Resend for verification emails
-* **PDF Processing**: pdf-parse-fork for document extraction
+* **PDF Processing**: pdf-parse-fork for text extraction, pdf-lib for image extraction
+* **Multimodal AI**: Gemini Vision API for analyzing tables, charts, and diagrams
+* **Chart Rendering**: Chart.js with react-chartjs-2 for interactive visualizations
 * **Markdown Rendering**: remark-gfm (tables, task lists) + rehype-highlight
 * **Deployment**: Docker, Vercel (cloud-agnostic)
 
@@ -287,6 +291,47 @@ Use the provided `Dockerfile` with your K8s deployment manifests.
 - ✅ Job queue for background tasks
 - ✅ Modular architecture (can split services later)
 - ✅ Cloud-agnostic containerized deployment
+
+## New Features: Multimodal PDF Analysis & Chart Generation 📊
+
+### Analyze Tables, Charts, and Diagrams
+
+PaperTrail now uses **Gemini Vision API** to analyze visual content in your PDFs:
+
+- **📊 Tables**: Automatically converted to Markdown format
+- **📈 Charts**: Data extracted and explained in detail
+- **🔬 Diagrams**: Components and relationships described
+
+### Interactive Chart Generation
+
+Ask the AI to create visual charts from table data:
+
+```
+You: "Show me the treatment success rates as a pie chart"
+
+AI: [Displays both the table AND an interactive pie chart]
+```
+
+**Supported Chart Types:**
+- **Pie Charts** - Show proportions and percentages
+- **Bar Charts** - Compare categories and groups
+- **Line Charts** - Display trends over time
+
+### How to Use
+
+1. **Upload a PDF** with tables or charts
+2. **Ask questions** like:
+   - "What does Table 2 show?"
+   - "Show me the results as a pie chart"
+   - "Compare the groups with a bar chart"
+3. **Get responses** with formatted tables AND interactive charts
+
+### Documentation
+
+- **[MULTIMODAL_FEATURES.md](MULTIMODAL_FEATURES.md)** - Complete technical guide
+- **[CHART_GENERATION.md](CHART_GENERATION.md)** - Chart usage documentation
+- **[CHART_EXAMPLES.md](CHART_EXAMPLES.md)** - Copy-paste example queries
+- **[IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md)** - Implementation details
 
 ## Project Structure
 
